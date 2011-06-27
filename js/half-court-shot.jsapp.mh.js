@@ -34,8 +34,8 @@ function HalfCourtShot( settings ){
     this.jersey = this.player;
     
     this.shots = 0;   // How many shots to take
-    this.page;
-    this.per_page; // how many shots per page...
+    this.page = 1;
+    this.per_page = 0; // how many shots per page...
     
     this.following = false;
     
@@ -173,15 +173,16 @@ function HalfCourtShot( settings ){
     * Generates a unique url for each instance
     **/
     this.genUrl = function(){
+        var pageOpts = "";
         var randomNo = Math.floor(Math.random()*9999999);
         
          if( typeof this.jersey == "string" ){
-            if( this.page != undefined  ) pageOpts = "page=" + this.page;
-            if( this.per_page != undefined ) pageOpts = pageOpts + "&per_page=" + this.per_page;
+            if( this.page != undefined  ) pageOpts = "&page=" + this.page;
+            if( this.per_page != undefined ) pageOpts += "&per_page=" + this.per_page;
         }
         
         if( this.playType == "shots" ){
-            var pageOpts = "";
+            pageOpts = "";
             
             if( this.jersey == "debuts" || this.jersey == "everyone" || this.jersey == "popular" )
                 this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?" + pageOpts + "&r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
@@ -194,11 +195,11 @@ function HalfCourtShot( settings ){
             var jerseyType = parseInt(this.jersey);
             
             if( parseInt(this.jersey) ){ 
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
+                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
             }
             else{
                 var followingOpts = ( eval(this.following) ) ? "following/" : "";
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/shots/" + followingOpts + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
+                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/shots/" + followingOpts + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
             }
         }
         
