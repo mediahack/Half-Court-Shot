@@ -2,7 +2,7 @@
 * @name     Half Court Shot
 * @author <codes>      mediaHACK - http://mediahack.com
 * @author <pretties>      KomodoMedia - http://komodomedia.com
-* @date         2010.07.28
+* @date         2011.06.26
 * @version	1.100825
 *
 * A JSApp that taps the Dribbble API (http://dribbble.com/api) to
@@ -28,7 +28,7 @@ function HalfCourtShot( settings ){
     this.play; // this is going to be our script object
     this.goal = document.getElementsByTagName('body')[0];  // This is where we want the shot to be displayed
     
-    var allstarsIMO = [ "rogie", "simplebits", "shauninman", "jsm", "squaredeye"];
+    var allstarsIMO = [ "rogie", "simplebits", "shauninman", "jsm", "squaredeye" ];
     var cointoss = Math.floor(Math.random()*5); 
     this.player = allstarsIMO[ cointoss ];  // This is the player we want to shoot
     this.jersey = this.player;
@@ -60,7 +60,7 @@ function HalfCourtShot( settings ){
         
         // loop thru our provided settings 
         for( var x in ball.settings){
-            if( ball[ x]  != undefined )
+            if( ball[ x ] != undefined )
                 ball[ x ] = ball.settings[x];
         }      
         
@@ -176,7 +176,7 @@ function HalfCourtShot( settings ){
         var pageOpts = "";
         var randomNo = Math.floor(Math.random()*9999999);
         
-         if( typeof this.jersey == "string" ){
+        if( typeof this.jersey == "string" ){
             if( this.page != undefined  ) pageOpts = "&page=" + this.page;
             if( this.per_page != undefined ) pageOpts += "&per_page=" + this.per_page;
         }
@@ -186,8 +186,8 @@ function HalfCourtShot( settings ){
             
             if( this.jersey == "debuts" || this.jersey == "everyone" || this.jersey == "popular" )
                 this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?" + pageOpts + "&r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
-             else                        
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
+            else                        
+                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
             
             if( this.debug ) console.log(this.url);
         }
