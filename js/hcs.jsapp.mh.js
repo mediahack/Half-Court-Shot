@@ -1,17 +1,17 @@
 /**
 * @name     Half Court Shot
 * @author <codes>      mediaHACK - http://mediahack.com
-* @author <pretties>      KomodoMedia - http://komodomedia.com
-* @date         2011.06.26
-* @version	1.100825
+* @author <pretties>       Rogie - http://rog.ie
+* @date         2013.12.13
+* @version  1.2
 *
 * A JSApp that taps the Dribbble API (http://dribbble.com/api) to
 * show off a shots and such from players. 
 *
-* This has been a mediaHACK and KomodoMedia  collab. Our powers
+* This has been a mediaHACK and Rogie  collab. Our powers
 * combined are Super-Sonic-Bionic. Trust pound.
 *
-* @copyright   yoMama
+* @copyright   whatevs
 * @licence  MIT Licensed. Nice if you give origination cred.
 * 
 **/
@@ -23,36 +23,37 @@
 * @returns  noshing!
 **/
 function HalfCourtShot( settings ){
-   
-    this.settings = settings;
-    this.play; // this is going to be our script object
-    this.goal = document.getElementsByTagName('body')[0];  // This is where we want the shot to be displayed
+    var self = this;
+
+    self.settings = settings;
+    self.play; // this is going to be our script object
+    self.goal = document.getElementsByTagName('body')[0];  // This is where we want the shot to be displayed
     
-    var allstarsIMO = [ "rogie", "simplebits", "shauninman", "jsm", "squaredeye" ];
+    var allstarsIMO = [ "rogie", "simplebits", "shauninman", "jsm", "squaredeye"];
     var cointoss = Math.floor(Math.random()*5); 
-    this.player = allstarsIMO[ cointoss ];  // This is the player we want to shoot
-    this.jersey = this.player;
+    self.player = allstarsIMO[ cointoss ];  // This is the player we want to shoot
+    self.jersey = self.player;
     
-    this.shots = 0;   // How many shots to take
-    this.page = 1;
-    this.per_page = 0; // how many shots per page...
+    self.shots = 0;   // How many shots to take
+    self.page = 1;
+    self.per_page; // how many shots per page...
     
-    this.following = false;
+    self.following = false;
     
-    this.className = "hcs";
-    this.apiUrl = 'http://api.dribbble.com/';
-    this.playType = "players";
-    this.url = "";
+    self.className = "hcs";
+    self.apiUrl = 'http://api.dribbble.com/';
+    self.playType = "players";
+    self.url = "";
     
     HalfCourtShot.currentIndex = HalfCourtShot.currentIndex || 0;    
-    this.index = HalfCourtShot.currentIndex++;
+    self.index = HalfCourtShot.currentIndex++;
     
-    this.debug = false;
+    self.debug = false;
     
     /**
     * Our configuration.
     **/
-    this.callThePlay = function(){
+    self.callThePlay = function(cb){
         var ball = this;
         
         // If we don't have any settings, lets just go with what we got!
@@ -60,37 +61,43 @@ function HalfCourtShot( settings ){
         
         // loop thru our provided settings 
         for( var x in ball.settings){
-            if( ball[ x ] != undefined )
+            if( ball[ x]  != undefined )
                 ball[ x ] = ball.settings[x];
         }      
+
+        if(typeof cb == 'function'){
+            cb();
+        }
         
-    }; // this.config = function()
+    }; // self.config = function()
     
     /**
     * Hail Mary shot from our site to Dribbble.
     **/
-    this.shootDaBall = function(){
+    self.shootDaBall = function(){
         var ball = this;
         
         var sCallback = "HalfCourtShot.callback" + ball.index;
         HalfCourtShot["callback" + ball.index] = function(data){ ball.jumboTron(data); };
         
-        ball.genUrl();
+        ball.genUrl(function(){
+            var instId = "halfCourtShot" + ball.currentIndex;
+            HalfCourtShot[ instId ] = document.createElement("script");
+            HalfCourtShot[ instId ].setAttribute("id", instId);
+            HalfCourtShot[ instId ].setAttribute("type", "text/javascript");
+            HalfCourtShot[ instId ].setAttribute("src", ball.url );
+            
+            document.getElementsByTagName('body')[0].appendChild( HalfCourtShot[ instId ] );    
+        });
         
-        var instId = "halfCourtShot" + ball.currentIndex;
-        HalfCourtShot[ instId ] = document.createElement("script");
-        HalfCourtShot[ instId ].setAttribute("id", instId);
-        HalfCourtShot[ instId ].setAttribute("type", "text/javascript");
-        HalfCourtShot[ instId ].setAttribute("src", ball.url );
         
-        document.getElementsByTagName('body')[0].appendChild( HalfCourtShot[ instId ] );
         
-    }; // this.shootDaBall = function()
+    }; // self.shootDaBall = function()
     
     /**
     * Display the output
     **/
-    this.jumboTron = function(data){
+    self.jumboTron = function(data){
         
         var ball = this;
                 
@@ -101,8 +108,8 @@ function HalfCourtShot( settings ){
         var thumbList = document.createElement("ul");
         
         var show = ( ball.shots ) ? ball.shots : data.shots.length;
-		if( show > data.shots.length ) show = data.shots.length;
-		
+        if( show > data.shots.length ) show = data.shots.length;
+        
         var mainShot = show; // we set this so we know where to stop with our main vs thumbs
         if( ball.warmUp ) show += ball.numberOfLayups; // if we're showing thumbs
         
@@ -126,14 +133,14 @@ function HalfCourtShot( settings ){
         
         ball.goal.appendChild(bounds); // add the bounds to the target element aka goal
         ball.goal.innerHTML = ball.goal.innerHTML; // Added for IE7 >=
-		
+        
         if( ball.onComplete ){
             ball.onComplete();
         }
         
-    }; // this.jumboTron = function(data)
+    }; // self.jumboTron = function(data)
     
-    this.buildImageListItem = function( d ){
+    self.buildImageListItem = function( d ){
         
         var image_url = (d.image_url) ? d.image_url : d.avatar_url ;
         
@@ -172,54 +179,64 @@ function HalfCourtShot( settings ){
     /**
     * Generates a unique url for each instance
     **/
-    this.genUrl = function(){
-        var pageOpts = "";
-        var randomNo = Math.floor(Math.random()*9999999);
-        
-        if( typeof this.jersey == "string" ){
-            if( this.page != undefined  ) pageOpts = "&page=" + this.page;
-            if( this.per_page != undefined ) pageOpts += "&per_page=" + this.per_page;
-        }
-        
-        if( this.playType == "shots" ){
+    self.genUrl = function(cb){
+        var self = this,
+            randomNo = Math.floor(Math.random()*9999999),
             pageOpts = "";
-            
-            if( this.jersey == "debuts" || this.jersey == "everyone" || this.jersey == "popular" )
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?" + pageOpts + "&r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index;
-            else                        
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/" + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
-            
-            if( this.debug ) console.log(this.url);
+        
+        if( typeof self.jersey == "string" ){ 
+            if( self.page != undefined  ) pageOpts = "&page=" + self.page;
+            if( self.per_page != undefined ) pageOpts = pageOpts + "&per_page=" + self.per_page;
+            else if(self.shots <= 30) pageOpts = pageOpts + "&shots="+self.shots+"&per_page=" + self.shots;
         }
-        else if( this.playType == "players" ){
-            var jerseyType = parseInt(this.jersey);
+        
+        if( self.playType == "shots" ){ 
+            var pageOpts = "";
             
-            if( parseInt(this.jersey) ){ 
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
+            if( self.jersey == "debuts" || self.jersey == "everyone" || self.jersey == "popular" )
+                self.url = self.apiUrl + self.playType + "/" + self.jersey + "/" + "?" + pageOpts + "&r=" + randomNo + "&callback=HalfCourtShot.callback" + self.index;
+             else                        
+                self.url = self.apiUrl + self.playType + "/" + self.jersey + "/" + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + self.index;
+            
+            if( self.debug ) console.log(self.url);
+        }
+        else if( self.playType == "players" ){
+            var jerseyType = parseInt(self.jersey);
+            
+            if( parseInt(self.jersey) ){
+                self.url = self.apiUrl + self.playType + "/" + self.jersey + "/?r=" + randomNo + "&callback=HalfCourtShot.callback" + self.index;
             }
             else{
-                var followingOpts = ( eval(this.following) ) ? "following/" : "";
-                this.url = this.apiUrl + this.playType + "/" + this.jersey + "/shots/" + followingOpts + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + this.index + pageOpts;
+                var followingOpts = ( eval(self.following) ) ? "following/" : "";
+                self.url = self.apiUrl + self.playType + "/" + self.jersey + "/shots/" + followingOpts + "?r=" + randomNo + "&callback=HalfCourtShot.callback" + self.index + pageOpts;
             }
         }
+
+        if(typeof cb == 'function'){
+            cb();
+        }
         
-    }; // this.genUrl = function()
+    }; // self.genUrl = function()
     
     /**
     * Object dump
     **/
-    this.rideThePine = function( v ){
-        if(this.debug) console.log( this[v] );
-    }; // this.rideThePine = function( v )
+    self.rideThePine = function( v ){
+        if(self.debug) console.log( this[v] );
+    }; // self.rideThePine = function( v )
     
     /**
     * Our init
     **/
-    this.hitTheFloor = function(){
-        this.callThePlay();
-        this.shootDaBall();
-    }; //  this.init = function()
+    self.hitTheFloor = function(){
+        var self = this;
+
+        self.callThePlay(function(){
+            self.shootDaBall();
+        });
+        
+    }; //  self.init = function()
     
-    this.hitTheFloor();
+    self.hitTheFloor();
     
 } // function HalfCourtShot( settings )
